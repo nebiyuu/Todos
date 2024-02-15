@@ -12,36 +12,73 @@ class Neww extends StatefulWidget {
 }
 
 class _NewwState extends State<Neww> {
-  bool mycolor = false;
+  List<String> todolist = ["todo 1", "todo 2"];
+
+  void todomethode() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          String todo = "";
+          return AlertDialog(
+            title: Text("input your list"),
+            content: TextField(
+              onChanged: (value) {
+                todo = value;
+              },
+              decoration: InputDecoration(hintText: "write here"),
+            ),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: Navigator.of(context).pop, child: Text("cancel")),
+              TextButton(
+                onPressed: () {
+                  setState(
+                    () {
+                      todolist.add(todo);
+                    },
+                  );
+                  Navigator.of(context).pop();
+                },
+                child: Text("save"),
+              )
+            ],
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("inputed")),
-        body: GestureDetector(
-            child: Container(
-              height: 300,
-              width: 300,
-              color: getcolor(),
-            ),
-            onTap: () {
-              if (mycolor) {
+      appBar: AppBar(title: Text("todo list app")),
+      body: ListView.builder(
+          itemCount: todolist.length,
+          itemBuilder: (context, index) {
+            final varr = todolist[index];
+            return ListTile(
+              onTap: () {
                 setState(() {
-                  mycolor = false;
+                  if (varr.startsWith("done")) {
+                    todolist[index] = varr.substring(2);
+                  } else {
+                    todolist[index] = 'done $varr';
+                  }
                 });
-              } else {
-                setState(() {
-                  mycolor = true;
-                });
-              }
-            }));
-  }
-
-  Color getcolor() {
-    if (mycolor) {
-      return Colors.red;
-    } else {
-      return Colors.blue;
-    }
+              },
+              title: Text(
+                varr,
+                style: TextStyle(
+                    decoration: varr.startsWith("done")
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none),
+              ),
+            );
+          }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          todomethode();
+        },
+        child: Icon(Icons.add),
+      ),
+    );
   }
 }
