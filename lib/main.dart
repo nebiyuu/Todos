@@ -12,27 +12,36 @@ class Neww extends StatefulWidget {
 }
 
 class _NewwState extends State<Neww> {
-  String inputed = "";
+  bool mycolor = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(inputed)),
-      body: Center(
-        child: TextField(
-          decoration: InputDecoration(hintText: "  write here "),
-          onChanged: (value) {
-            setState(() {
-              inputed = value;
-            });
-          },
-        ),
-      ),
-      bottomSheet: Container(
-        alignment: Alignment.center,
-        height: 50,
-        child: Text("you wrote  $inputed  "),
-      ),
-    );
+        appBar: AppBar(title: Text("inputed")),
+        body: GestureDetector(
+            child: Container(
+              height: 300,
+              width: 300,
+              color: getcolor(),
+            ),
+            onTap: () {
+              if (mycolor) {
+                setState(() {
+                  mycolor = false;
+                });
+              } else {
+                setState(() {
+                  mycolor = true;
+                });
+              }
+            }));
+  }
+
+  Color getcolor() {
+    if (mycolor) {
+      return Colors.red;
+    } else {
+      return Colors.blue;
+    }
   }
 }
