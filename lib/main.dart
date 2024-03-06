@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 
 class Todo {
   final String title;
-  final String disc;
 
-  const Todo(this.title, this.disc);
+  bool checkk = false;
+
+  Todo(
+    this.title,
+  );
 }
 
 List<Todo> todos = [
-  const Todo(" title 1", "disc 1"),
-  const Todo("title 2", "disc 2")
+  Todo(
+    " title 1",
+  ),
+  Todo(
+    "title 2",
+  )
 ];
 
 void main() => runApp(MaterialApp(
@@ -31,7 +38,7 @@ class Neww extends StatelessWidget {
         backgroundColor: Colors.red,
         centerTitle: true,
       ),
-      body: Foo(),
+      body: const Foo(),
     );
   }
 }
@@ -45,7 +52,7 @@ class Foo extends StatefulWidget {
 
 class _FooState extends State<Foo> {
   late String title;
-  late String disc;
+  late bool checkk;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +60,7 @@ class _FooState extends State<Foo> {
       body: ListView.builder(
         itemCount: todos.length,
         itemBuilder: ((context, index) {
-          return ListTile(
+          return CheckboxListTile(
             title: Text(
               todos[index].title,
               // Apply line-through decoration if the title starts with 'done'
@@ -63,27 +70,11 @@ class _FooState extends State<Foo> {
                     : TextDecoration.none,
               ),
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Decpage(todo: todos[index]),
-                ),
-              );
-            },
-            onLongPress: () {
-              setState(
-                () {
-                  // Toggle the 'done' prefix for the title
-                  if (todos[index].title.startsWith("done")) {
-                    todos[index] = Todo(
-                        todos[index].title.substring(5), todos[index].disc);
-                  } else {
-                    todos[index] =
-                        Todo('done ${todos[index].title}', todos[index].disc);
-                  }
-                },
-              );
+            value: todos[index].checkk,
+            onChanged: (bool? newValue) {
+              setState(() {
+                todos[index].checkk = newValue!;
+              });
             },
           );
         }),
@@ -103,10 +94,6 @@ class _FooState extends State<Foo> {
                       decoration: const InputDecoration(labelText: "title"),
                       onChanged: (value) => setState(() => title = value),
                     ),
-                    TextField(
-                      decoration: const InputDecoration(labelText: "disc"),
-                      onChanged: (value) => setState(() => disc = value),
-                    ),
                   ],
                 ),
                 actions: <Widget>[
@@ -118,8 +105,12 @@ class _FooState extends State<Foo> {
                   ),
                   TextButton(
                     onPressed: () {
-                      if (title != null && disc != null) {
-                        Navigator.pop(context, Todo(title, disc));
+                      if (title != null) {
+                        Navigator.pop(
+                            context,
+                            Todo(
+                              title,
+                            ));
                       }
                     },
                     child: const Text("save"),
@@ -137,20 +128,6 @@ class _FooState extends State<Foo> {
         },
         child: const Icon(Icons.add),
       ),
-    );
-  }
-}
-
-class Decpage extends StatelessWidget {
-  final Todo todo;
-
-  const Decpage({Key? key, required this.todo}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(todo.title)),
-      body: Center(child: Text(todo.disc)),
     );
   }
 }
