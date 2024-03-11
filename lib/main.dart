@@ -1,101 +1,145 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Todo {
   final String title;
-
   bool checkk;
 
   Todo(
-    this.title,
-  ) : checkk = false;
+    this.title, {
+    this.checkk = false,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'checkk': checkk,
+    };
+  }
 }
 
-void main() async {
-  await Hive.initFlutter();
-  var box = await Hive.openBox("mydb");
+List<Todo> todos = [
+  Todo(
+    "title 1",
+  ),
+  Todo(
+    "title 2",
+  )
+];
 
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: Neww(
-      todos: [],
-    ),
-  ));
+void main() => runApp(MaterialApp(
+      home: Neww(
+        todos: todos,
+        storage: Tododb(),
+      ),
+    ));
+
+class Tododb {
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/todo.txt');
+  }
+
+  Future<void> writeTodos(List<Todo> todos) async {
+    final file = await _localFile;
+    List<Map<String, dynamic>> todoListJson =
+        todos.map((todo) => todo.toJson()).toList();
+    String todosJson = json.encode(todoListJson);
+    await file.writeAsString(todosJson);
+  }
+
+  Future<List<Todo>> readTodos() async {
+    try {
+      final file = await _localFile;
+      if (!file.existsSync()) {
+        // If the file doesn't exist, return an empty list
+        return [];
+      }
+      String contents = await file.readAsString();
+      List<dynamic> todoListJson = json.decode(contents);
+      List<Todo> todos = todoListJson
+          .map((todoJson) => Todo(
+                todoJson['title'],
+                checkk: todoJson['checkk'],
+              ))
+          .toList();
+      return todos;
+    } catch (e) {
+      return [];
+    }
+  }
 }
 
-class Neww extends StatelessWidget {
+class Neww extends StatefulWidget {
   final List<Todo> todos;
+  final Tododb storage;
 
-  const Neww({Key? key, required this.todos}) : super(key: key);
+  const Neww({Key? key, required this.todos, required this.storage})
+      : super(key: key);
+
+  @override
+  _NewwState createState() => _NewwState();
+}
+
+class _NewwState extends State<Neww> {
+  late String title;
+
+  @override
+  void initState() {
+    super.initState();
+    loadTodos();
+  }
+
+  Future<void> loadTodos() async {
+    List<Todo> loadedTodos = await widget.storage.readTodos();
+    setState(() {
+      widget.todos.clear();
+      widget.todos.addAll(loadedTodos);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("todo aapp"),
-        backgroundColor: Colors.purple,
+        title: const Text("todo app"),
+        backgroundColor: const Color.fromARGB(255, 128, 20, 12),
         centerTitle: true,
       ),
-      body: const Foo(),
-    );
-  }
-}
-
-class Foo extends StatefulWidget {
-  const Foo({Key? key}) : super(key: key);
-
-  @override
-  State<Foo> createState() => _FooState();
-}
-
-class _FooState extends State<Foo> {
-  late String title;
-  late bool checkk;
-  final _mydb = Hive.box('mydb');
-  Tododb ddb = Tododb();
-
-  @override
-  void initState() {
-    if (_mydb.get('todolist') == null) {
-      // Corrected condition
-      ddb.createdata();
-    } else {
-      ddb.loadd();
-    }
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 179, 77, 197),
       body: ListView.builder(
-        itemCount: ddb.todos.length,
+        itemCount: widget.todos.length,
         itemBuilder: ((context, index) {
           return CheckboxListTile(
             title: Text(
-              ddb.todos[index].title,
+              widget.todos[index].title,
               style: TextStyle(
-                decoration: ddb.todos[index].checkk
+                decoration: widget.todos[index].checkk
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
               ),
             ),
-            value: ddb.todos[index].checkk,
+            value: widget.todos[index].checkk,
             onChanged: (bool? newValue) {
               setState(() {
-                ddb.todos[index].checkk = newValue!;
+                widget.todos[index].checkk = newValue!;
+                widget.storage.writeTodos(widget.todos);
               });
-              ddb.updatedd();
             },
             controlAffinity: ListTileControlAffinity.leading,
           );
         }),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purpleAccent,
         onPressed: () async {
-          final Todo? newtodo = await showDialog<Todo>(
+          final Todo? newTodo = await showDialog<Todo>(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
@@ -119,12 +163,14 @@ class _FooState extends State<Foo> {
                   ),
                   TextButton(
                     onPressed: () {
-                      ddb.updatedd();
-                      Navigator.pop(
+                      if (title.isNotEmpty) {
+                        Navigator.pop(
                           context,
                           Todo(
                             title,
-                          ));
+                          ),
+                        );
+                      }
                     },
                     child: const Text("save"),
                   ),
@@ -133,39 +179,15 @@ class _FooState extends State<Foo> {
             },
           );
 
-          if (newtodo != null) {
+          if (newTodo != null) {
             setState(() {
-              ddb.todos.add(newtodo);
+              widget.todos.add(newTodo);
+              widget.storage.writeTodos(widget.todos);
             });
-            ddb.updatedd(); // Update the todos list in the box
           }
         },
         child: const Icon(Icons.add),
       ),
     );
-  }
-}
-
-class Tododb {
-  List<Todo> todos = [];
-  final _mydb = Hive.box('mydb');
-
-  createdata() {
-    todos = [
-      Todo(
-        " title 1",
-      ),
-      Todo(
-        "title 2",
-      )
-    ];
-  }
-
-  updatedd() {
-    _mydb.get('todolist', defaultValue: todos);
-  }
-
-  loadd() {
-    _mydb.put('todolist', todos);
   }
 }
