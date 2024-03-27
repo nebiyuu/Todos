@@ -15,7 +15,7 @@ class Todo {
 
   Map<String, dynamic> toJson() {
     return {
-      'title': title,
+      'title': title, 
       'checkk': checkk,
     };
   }
@@ -31,11 +31,14 @@ List<Todo> todos = [
 ];
 
 void main() => runApp(MaterialApp(
+      // Dark theme configuration
+      theme: ThemeData.dark(),
       home: Neww(
         todos: todos,
         storage: Tododb(),
       ),
     ));
+
 
 class Tododb {
   Future<String> get _localPath async {
@@ -111,8 +114,7 @@ class _NewwState extends State<Neww> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("todo app"),
-        backgroundColor: const Color.fromARGB(255, 128, 20, 12),
-        centerTitle: true,
+         centerTitle: true,
       ),
       body: ListView.builder(
         itemCount: widget.todos.length,
