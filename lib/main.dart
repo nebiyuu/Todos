@@ -32,7 +32,14 @@ List<Todo> todos = [
 
 void main() => runApp(MaterialApp(
       // Dark theme configuration
-      theme: ThemeData.dark(),
+
+      darkTheme: ThemeData.dark().copyWith(
+        // Dark Theme
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.deepPurple,
+        ),
+      ),
+      themeMode: ThemeMode.system,
       home: Neww(
         todos: todos,
         storage: Tododb(),
@@ -129,7 +136,7 @@ class _NewwState extends State<Neww> {
           return Dismissible(
             key: Key(todoo.title),
             background: Container(
-              color: Colors.red,
+              color: Colors.deepPurpleAccent,
               alignment: Alignment.centerLeft,
               padding: EdgeInsets.only(left: 20.0),
               child: Icon(Icons.delete, color: Colors.white),
