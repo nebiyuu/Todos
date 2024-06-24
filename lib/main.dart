@@ -15,7 +15,7 @@ class Todo {
 
   Map<String, dynamic> toJson() {
     return {
-      'title': title, 
+      'title': title,
       'checkk': checkk,
     };
   }
@@ -38,7 +38,6 @@ void main() => runApp(MaterialApp(
         storage: Tododb(),
       ),
     ));
-
 
 class Tododb {
   Future<String> get _localPath async {
@@ -79,6 +78,12 @@ class Tododb {
       return [];
     }
   }
+
+  Future<void> deleteTodo(String title) async {
+    List<Todo> todos = await readTodos();
+    todos.removeWhere((todo) => todo.title == title);
+    await writeTodos(todos);
+  }
 }
 
 class Neww extends StatefulWidget {
@@ -114,28 +119,49 @@ class _NewwState extends State<Neww> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("todo app"),
-         centerTitle: true,
+        centerTitle: true,
       ),
       body: ListView.builder(
         itemCount: widget.todos.length,
         itemBuilder: ((context, index) {
-          return CheckboxListTile(
-            title: Text(
-              widget.todos[index].title,
-              style: TextStyle(
-                decoration: widget.todos[index].checkk
-                    ? TextDecoration.lineThrough
-                    : TextDecoration.none,
-              ),
+          final todoo = widget.todos[index];
+
+          return Dismissible(
+            key: Key(todoo.title),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(left: 20.0),
+              child: Icon(Icons.delete, color: Colors.white),
             ),
-            value: widget.todos[index].checkk,
-            onChanged: (bool? newValue) {
+            onDismissed: (direction) async {
+              await widget.storage.deleteTodo(todoo.title);
               setState(() {
-                widget.todos[index].checkk = newValue!;
-                widget.storage.writeTodos(widget.todos);
+                todos.removeAt(index);
               });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${todoo.title} dismissed')),
+              );
             },
-            controlAffinity: ListTileControlAffinity.leading,
+            child: CheckboxListTile(
+              title: Text(
+                widget.todos[index].title,
+                style: TextStyle(
+                  decoration: widget.todos[index].checkk
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
+                ),
+              ),
+              value: widget.todos[index].checkk,
+              onChanged: (bool? newValue) {
+                setState(() {
+                  widget.todos[index].checkk = newValue!;
+                  widget.storage.writeTodos(widget.todos);
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
           );
         }),
       ),
