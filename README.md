@@ -1,17 +1,14 @@
-# newapp
+Flutter Todo List App
+Overview
+Welcome to the Flutter Todo List app! This project is a simple todo list application built with Flutter. It’s designed as a beginner-level project to help users get familiar with Flutter and its core concepts.
 
-A new Flutter project.
+Features
+Add Todo Items: Users can add new todo items to their list.
+View Todo Items: Users can see a list of all their added todo items.
+Remove Todo Items: Users can remove todo items from their list.
 
-## Getting Started
+Data Storage
+For this project, todo items are stored in a text file using the path provider package. This approach was chosen to keep the application simple and beginner-friendly. The data file is located in the device’s local storage.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# flutter-test
+Acknowledgments
+This app is a simple Flutter project for learning purposes. Special thanks to the Flutter community for their support and resources.
